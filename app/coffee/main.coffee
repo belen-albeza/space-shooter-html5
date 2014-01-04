@@ -4,12 +4,14 @@ PlayScene =
     game.load.image 'ship', 'images/captain.png'
     game.load.image 'bullet', 'images/laser.png'
     game.load.spritesheet 'alien', 'images/alien.png', 48, 42
+    game.load.spritesheet 'explosion', 'images/explosion.png', 50, 50
 
   create: ->
     # create sprites
     game.add.sprite 0, 0, 'background'
     @aliens = game.add.group()
     @bullets = game.add.group()
+    @explosions = game.add.group()
     @hero = game.add.existing new Hero
 
     # setup input
@@ -25,6 +27,7 @@ PlayScene =
 
     # handle collisions
     game.physics.collide @bullets, @aliens, (bullet, alien) =>
+      @_spawnExplosionAt alien.x, alien.y
       bullet.kill()
       alien.kill()
 
@@ -43,6 +46,10 @@ PlayScene =
 
   _spawnAlien: ->
     @_spawnSprite @aliens, Alien, game.world.randomX, -20
+
+  _spawnExplosionAt: (x, y) ->
+    @_spawnSprite @explosions, Explosion, x, y
+    # @explosions.add new Explosion x, y
 
   _handleInput: ->
     if @kbCursors.left.isDown
@@ -93,13 +100,39 @@ class Alien extends Phaser.Sprite
     @animations.add 'fly', [0, 1], 3, true
     @animations.play 'fly'
 
-    @init x, y
+    @init()
 
   init: ->
     @body.velocity.y = game.rnd.integerInRange Alien.MIN_SPEED_Y,
       Alien.MAX_SPEED_Y
     @body.velocity.x = game.rnd.integerInRange -Alien.MAX_SPEED_X,
       Alien.MAX_SPEED_X
+
+
+class Explosion extends Phaser.Sprite
+  @MAX_LIFESPAN: 1000
+
+  constructor: (x, y) ->
+    super game, x, y, 'explosion'
+    @anchor.setTo 0.5, 0.5
+    @animations.add 'boom', [0..11], 12, false
+    @init()
+
+  init: ->
+    @animations.stop 'boom', true
+    @animations.play 'boom'
+    @lifespan = Explosion.MAX_LIFESPAN
+
+    # tween scale
+    startScale = game.rnd.realInRange 2.0, 3.5
+    @scale.setTo startScale, startScale
+    (game.add.tween @scale).to {x: startScale * 1.5, y: startScale * 1.5},
+      @lifespan, Phaser.Easing.Linear.None, true, 0
+
+    # tween alpha
+    @alpha = 1.0
+    (game.add.tween @).to {alpha: 0.0}, @lifespan, Phaser.Easing.Linear.None,
+      true, 0
 
 
 game = new Phaser.Game 550, 600, Phaser.WEBGL, 'game', PlayScene
