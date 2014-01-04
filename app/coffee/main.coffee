@@ -19,12 +19,30 @@ PlayScene =
 
   update: ->
     @_handleInput()
+
     # spawn aliens
-    if (game.rnd.integerInRange 0, 100) < 10
-      @aliens.add new Alien game.world.randomX, - 20
+    @_spawnAlien() if (game.rnd.integerInRange 0, 100) < 10
+
+    # handle collisions
+    game.physics.collide @bullets, @aliens, (bullet, alien) =>
+      bullet.kill()
+      alien.kill()
+
+  _spawnSprite: (group, klass, x, y) ->
+    # try to reuse an available sprite slot in the group
+    instance = group.getFirstExists false
+    if instance?
+      instance.reset x, y
+      instance.init() if instance.init?
+    # if there isn't any free slot, then add a new one
+    else
+      group.add new klass x, y
 
   _shoot: ->
-    @bullets.add new Bullet @hero.x, @hero.y - 20
+    @_spawnSprite @bullets, Bullet, @hero.x, @hero.y - 20
+
+  _spawnAlien: ->
+    @_spawnSprite @aliens, Alien, game.world.randomX, -20
 
   _handleInput: ->
     if @kbCursors.left.isDown
@@ -56,7 +74,9 @@ class Bullet extends Phaser.Sprite
     super game, x, y, 'bullet'
     @anchor.setTo 0.5, 0.5
     @outOfBoundsKill = true
+    @init()
 
+  init: ->
     @body.velocity.y = -Bullet.SPEED
 
 
@@ -73,6 +93,9 @@ class Alien extends Phaser.Sprite
     @animations.add 'fly', [0, 1], 3, true
     @animations.play 'fly'
 
+    @init x, y
+
+  init: ->
     @body.velocity.y = game.rnd.integerInRange Alien.MIN_SPEED_Y,
       Alien.MAX_SPEED_Y
     @body.velocity.x = game.rnd.integerInRange -Alien.MAX_SPEED_X,
