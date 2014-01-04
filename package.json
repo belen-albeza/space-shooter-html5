@@ -1,0 +1,34 @@
+{
+  "name": "space-shooter-html5",
+  "version": "0.0.0",
+  "description": "Simple 2D shooter",
+  "main": "index.js",
+  "dependencies": {
+    "grunt": "~0.4.2",
+    "grunt-coffeelint": "~0.0.8",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-coffee": "~0.8.0",
+    "grunt-contrib-connect": "~0.6.0",
+    "grunt-contrib-copy": "~0.5.0",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt-sed": "~0.1.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/belen-albeza/space-shooter-html5.git"
+  },
+  "keywords": [
+    "game"
+  ],
+  "author": "Belén Albeza <belen.albeza@gmail.com>",
+  "license": "MIT",
+  "readmeFilename": "README.md",
+  "gitHead": "b903ba976db3fa05b1d84010bb594e81d1477c02",
+  "bugs": {
+    "url": "https://github.com/belen-albeza/space-shooter-html5/issues"
+  }
+}
