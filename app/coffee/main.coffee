@@ -1,21 +1,4 @@
 PlayScene =
-  preload: ->
-    # images
-    game.load.image 'background', 'images/background.png'
-    game.load.image 'ship', 'images/captain.png'
-    game.load.image 'bullet', 'images/laser.png'
-    game.load.spritesheet 'alien', 'images/alien.png', 48, 42
-    game.load.spritesheet 'explosion', 'images/explosion.png', 50, 50
-    game.load.image 'hud', 'images/hud.png'
-    game.load.image 'energy_bg', 'images/energy_low.png'
-    game.load.image 'energy_fg', 'images/energy_full.png'
-
-    # audio
-    game.load.audio 'sfx_explosion', ['sounds/explosion.wav']
-    game.load.audio 'sfx_shoot', ['sounds/shoot.wav']
-    game.load.audio 'sfx_bgm', ['sounds/gothic_dreams.mp3',
-      'sounds/gothic_dreams.ogg']
-
   create: ->
     # game logic attributes
     @score = 0
@@ -217,6 +200,49 @@ class Explosion extends Phaser.Sprite
       true, 0
 
 
+LoadingScene =
+  preload: ->
+    @loading = game.add.sprite 275, 300, 'loading'
+    @loading.anchor.setTo 0.5, 0.5
+    text = game.add.text 275, 250, 'Loading', {
+      font: '16pt monospace', fill: '#fff'
+    }
+    text.anchor.setTo 0.5, 0.5
+
+    game.load.setPreloadSprite @loading
+
+    # images
+    game.load.image 'background', 'images/background.png'
+    game.load.image 'ship', 'images/captain.png'
+    game.load.image 'bullet', 'images/laser.png'
+    game.load.spritesheet 'alien', 'images/alien.png', 48, 42
+    game.load.spritesheet 'explosion', 'images/explosion.png', 50, 50
+    game.load.image 'hud', 'images/hud.png'
+    game.load.image 'energy_bg', 'images/energy_low.png'
+    game.load.image 'energy_fg', 'images/energy_full.png'
+
+    # audio
+    game.load.audio 'sfx_explosion', ['sounds/explosion.wav']
+    game.load.audio 'sfx_shoot', ['sounds/shoot.wav']
+    game.load.audio 'sfx_bgm', ['sounds/gothic_dreams.mp3',
+      'sounds/gothic_dreams.ogg']
+
+  create: ->
+    @loading.cropEnabled = false
+    game.state.start 'play'
+
+
+BootScene =
+  preload: ->
+    # load here the assets needed by the loading scene
+    game.load.image 'loading', 'images/loading.png'
+
+  create: ->
+    game.state.start 'loading'
+
+
 game = new Phaser.Game 550, 600, Phaser.WEBGL, 'game'
+game.state.add 'boot', BootScene
+game.state.add 'loading', LoadingScene
 game.state.add 'play', PlayScene
-game.state.start 'play'
+game.state.start 'boot'
