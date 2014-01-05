@@ -1,5 +1,6 @@
 PlayScene =
   preload: ->
+    # images
     game.load.image 'background', 'images/background.png'
     game.load.image 'ship', 'images/captain.png'
     game.load.image 'bullet', 'images/laser.png'
@@ -8,6 +9,12 @@ PlayScene =
     game.load.image 'hud', 'images/hud.png'
     game.load.image 'energy_bg', 'images/energy_low.png'
     game.load.image 'energy_fg', 'images/energy_full.png'
+
+    # audio
+    game.load.audio 'sfx_explosion', ['sounds/explosion.wav']
+    game.load.audio 'sfx_shoot', ['sounds/shoot.wav']
+    game.load.audio 'sfx_bgm', ['sounds/gothic_dreams.mp3',
+      'sounds/gothic_dreams.ogg']
 
   create: ->
     # game logic attributes
@@ -20,6 +27,12 @@ PlayScene =
     @explosions = game.add.group()
     @hero = game.add.existing new Hero
     @hud = game.add.group()
+
+    # create audio samples
+    @sfxShoot = game.add.audio 'sfx_shoot', 0.5
+    @sfxExplosion = game.add.audio 'sfx_explosion', 0.5
+    @sfxBackground = game.add.audio 'sfx_bgm', 1, true
+    @sfxBackground.play()
 
     @_setupHud @hud
 
@@ -63,13 +76,14 @@ PlayScene =
 
   _shoot: ->
     @_spawnSprite @bullets, Bullet, @hero.x, @hero.y - 20
+    @sfxShoot.play()
 
   _spawnAlien: ->
     @_spawnSprite @aliens, Alien, game.world.randomX, -20
 
   _spawnExplosionAt: (x, y) ->
     @_spawnSprite @explosions, Explosion, x, y
-    # @explosions.add new Explosion x, y
+    @sfxExplosion.play()
 
   _handleInput: ->
     if @kbCursors.left.isDown
@@ -114,7 +128,7 @@ PlayScene =
       subtitle.anchor.setTo 0.5, 0.5
 
       # restart the game when space bar is pressed
-      @kbSpace.onDown.add =>
+      @kbSpace.onDown.add ->
         game.state.start 'play'
 
     setTimeout callback, 1500
