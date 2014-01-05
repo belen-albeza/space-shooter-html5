@@ -134,6 +134,9 @@ PlayScene =
     setTimeout callback, 1500
     @kbSpace.onDown.removeAll()
 
+  shutdown: ->
+    @sfxBackground.stop()
+
 class Hero extends Phaser.Sprite
   @SPEED: 360
   @MAX_HEALTH: 4
