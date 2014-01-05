@@ -79,11 +79,11 @@ PlayScene =
   _setupHud: ->
     @hud.create 2, 538, 'hud'
 
-    @scoreText = game.add.text 540, 542, '' + @score, {
+    @scoreText = game.add.text 540, 567, '' + @score, {
       font: '32pt monospace'
       fill: '#fff'
     }, @hud
-    @scoreText.anchor.setTo 1.0, 0.0
+    @scoreText.anchor.setTo 1.0, 0.5
 
     @hud.create 15, 545, 'energy_bg'
     @energyBar = @hud.create 15, 545, 'energy_fg'
