@@ -202,8 +202,8 @@ class Explosion extends Phaser.Sprite
 
 LoadingScene =
   preload: ->
-    @loading = game.add.sprite 275, 300, 'loading'
-    @loading.anchor.setTo 0.5, 0.5
+    @loading = game.add.sprite 150, 300, 'loading'
+    @loading.anchor.setTo 0.0, 0.5
     text = game.add.text 275, 250, 'Loading', {
       font: '16pt monospace', fill: '#fff'
     }
