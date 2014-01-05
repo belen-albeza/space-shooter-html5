@@ -41,7 +41,8 @@ module.exports = (grunt) ->
         files: [{
           expand: true
           cwd: 'app'
-          src: ['js/**/*.js', '!js/vendor/**/*.js', '**/*.html']
+          src: ['js/**/*.js', '!js/vendor/**/*.js', '**/*.html', 'images/*',
+            'sounds/*']
           dest: 'build'
         }, {
           expand: true
