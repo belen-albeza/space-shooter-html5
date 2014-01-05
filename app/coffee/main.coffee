@@ -5,19 +5,32 @@ PlayScene =
     game.load.image 'bullet', 'images/laser.png'
     game.load.spritesheet 'alien', 'images/alien.png', 48, 42
     game.load.spritesheet 'explosion', 'images/explosion.png', 50, 50
+    game.load.image 'hud', 'images/hud.png'
+    game.load.image 'energy_bg', 'images/energy_low.png'
+    game.load.image 'energy_fg', 'images/energy_full.png'
 
   create: ->
+    # game logic attributes
+    @score = 0
+
     # create sprites
     game.add.sprite 0, 0, 'background'
     @aliens = game.add.group()
     @bullets = game.add.group()
     @explosions = game.add.group()
     @hero = game.add.existing new Hero
+    @hud = game.add.group()
+
+    @_setupHud @hud
 
     # setup input
     @kbCursors = game.input.keyboard.createCursorKeys()
-    kbSpace = game.input.keyboard.addKey Phaser.Keyboard.SPACEBAR
-    kbSpace.onDown.add @_shoot, @
+    @kbSpace = game.input.keyboard.addKey Phaser.Keyboard.SPACEBAR
+    @kbSpace.onDown.add @_shoot, @
+
+    # on game over condition
+    @hero.events.onKilled.add =>
+      @_gameOver()
 
   update: ->
     @_handleInput()
@@ -30,6 +43,13 @@ PlayScene =
       @_spawnExplosionAt alien.x, alien.y
       bullet.kill()
       alien.kill()
+      @score += 10
+    game.physics.collide @hero, @aliens, (hero, alien) =>
+      @_spawnExplosionAt alien.x, alien.y
+      alien.kill()
+      hero.damage 1
+
+    @_updateHud()
 
   _spawnSprite: (group, klass, x, y) ->
     # try to reuse an available sprite slot in the group
@@ -59,12 +79,57 @@ PlayScene =
     else
       @hero.stop()
 
+  _setupHud: ->
+    @hud.create 2, 538, 'hud'
+
+    @scoreText = game.add.text 540, 542, '' + @score, {
+      font: '32pt monospace'
+      fill: '#fff'
+    }, @hud
+    @scoreText.anchor.setTo 1.0, 0.0
+
+    @hud.create 15, 545, 'energy_bg'
+    @energyBar = @hud.create 15, 545, 'energy_fg'
+    @energyBar.cropEnabled = true
+
+  _updateHud: ->
+    @scoreText.setText @score
+    @energyBar.crop.width = if @hero? then \
+      Math.max 0, (@hero.health + 1) / (Hero.MAX_HEALTH + 1) * @energyBar.width
+    else \
+      0
+
+  _gameOver: ->
+    # show game over title
+    title = game.add.text 275, 250, 'Game Over', {
+      font: '32pt monospace', fill: '#fff'
+    }, @hud
+    title.anchor.setTo 0.5, 0.5
+
+    # show subtitle and allow restart of the game after a few seconds
+    callback = =>
+      subtitle = game.add.text 275, 290, 'Press SPACE to restart', {
+        font: '16pt monospace', fill: '#fff'
+      }, @hud
+      subtitle.anchor.setTo 0.5, 0.5
+
+      # restart the game when space bar is pressed
+      @kbSpace.onDown.add =>
+        game.state.start 'play'
+
+    setTimeout callback, 1500
+    @kbSpace.onDown.removeAll()
+
 class Hero extends Phaser.Sprite
   @SPEED: 360
+  @MAX_HEALTH: 4
 
   constructor: ->
     super game, 275, 500, 'ship'
     @anchor.setTo 0.5, 0.5
+    @health = Hero.MAX_HEALTH
+    @body.immovable = true
+    @body.collideWorldBounds = true
 
   move: (direction) ->
     sign = if direction is 'left' then -1 else 1
@@ -135,4 +200,6 @@ class Explosion extends Phaser.Sprite
       true, 0
 
 
-game = new Phaser.Game 550, 600, Phaser.WEBGL, 'game', PlayScene
+game = new Phaser.Game 550, 600, Phaser.WEBGL, 'game'
+game.state.add 'play', PlayScene
+game.state.start 'play'
